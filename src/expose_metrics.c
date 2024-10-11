@@ -101,12 +101,6 @@ void update_processes_gauge()
     }
 }
 
-// TODO: ...
-void update_stat_gauges()
-{
-
-}
-
 void* expose_metrics(void* arg)
 {
     (void)arg; // Argumento no utilizado
@@ -133,7 +127,6 @@ void* expose_metrics(void* arg)
     return NULL;
 }
 
-// WIP: ...
 int init_metrics()
 {
     // Inicializamos el mutex
@@ -164,7 +157,7 @@ int init_metrics()
     memory_metrics[0] = prom_gauge_new("memory_total", "Memoria total", 0, NULL);
     memory_metrics[1] = prom_gauge_new("memory_used", "Memoria en uso", 0, NULL);
     memory_metrics[2] = prom_gauge_new("memory_free", "Memoria libre", 0, NULL);
-    memory_metrics[3] = prom_gauge_new("memory_free_percentage", "Porcentaje de memoria libre", 0, NULL);
+    memory_metrics[3] = prom_gauge_new("memory_used_percentage", "Porcentaje de memoria en uso", 0, NULL);
     // Chequear que todo haya ido bien
     for (int i = 0; i < N_MEM_METRICS; i++)
     {

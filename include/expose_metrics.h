@@ -45,11 +45,6 @@ void update_network_gauges();
 void update_processes_gauge();
 
 /**
- * @brief Actualiza las métrica de uso de stats en general.
- */
-void update_stat_gauges();
-
-/**
  * @brief Función del hilo para exponer las métricas vía HTTP en el puerto 8000.
  * @param arg Argumento no utilizado.
  * @return NULL

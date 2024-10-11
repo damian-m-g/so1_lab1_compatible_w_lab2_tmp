@@ -51,7 +51,6 @@ int main(int argc, char* argv[])
         update_disk_gauges();
         update_network_gauges();
         update_processes_gauge();
-        update_stat_gauges();
         sleep(SLEEP_TIME);
     }
 

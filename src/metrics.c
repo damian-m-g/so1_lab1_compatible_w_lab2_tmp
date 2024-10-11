@@ -134,8 +134,8 @@ double* get_disk_usage()
     // Leer los valores de disco de interés
     while (fgets(buffer, sizeof(buffer), fp) != NULL)
     {
-        if (sscanf(buffer, "%*u       %*u sda %*u %*u %llu %llu %*u %*u %llu %llu",
-            &sectors_read, &time_spent_reading, &sectors_written, &time_spent_writting) == 4)
+        if (sscanf(buffer, "%*u       %*u sda %*u %*u %llu %llu %*u %*u %llu %llu", &sectors_read, &time_spent_reading,
+                   &sectors_written, &time_spent_writting) == 4)
         {
             break; // Datos de HDD encontrados, podemos dejar de leer
         }
@@ -162,8 +162,8 @@ double* get_network_usage()
 {
     FILE* fp;
     char buffer[BUFFER_SIZE];
-    unsigned long long rx_bytes = 0, rx_errors = 0, rx_packets_dropped = 0,
-        tx_bytes = 0, tx_errors = 0, tx_packets_dropped = 0;
+    unsigned long long rx_bytes = 0, rx_errors = 0, rx_packets_dropped = 0, tx_bytes = 0, tx_errors = 0,
+                       tx_packets_dropped = 0;
 
     // Abrir el archivo /proc/net/dev
     fp = fopen("/proc/net/dev", "r");
@@ -177,8 +177,8 @@ double* get_network_usage()
     int data_read = 0;
     while (fgets(buffer, sizeof(buffer), fp) != NULL)
     {
-        if (sscanf(buffer, "en%*s %llu %*u %llu %llu %*u %*u %*u %*u %llu %*u %llu %llu",
-            &rx_bytes, &rx_errors, &rx_packets_dropped, &tx_bytes, &tx_errors, &tx_packets_dropped) == 6)
+        if (sscanf(buffer, "en%*s %llu %*u %llu %llu %*u %*u %*u %*u %llu %*u %llu %llu", &rx_bytes, &rx_errors,
+                   &rx_packets_dropped, &tx_bytes, &tx_errors, &tx_packets_dropped) == 6)
         {
             data_read = 1;
             break; // Datos de networking encontrados, podemos dejar de leer
@@ -188,7 +188,7 @@ double* get_network_usage()
     fclose(fp);
 
     // Verificar si se encontraron los valores
-    if(data_read == 0)
+    if (data_read == 0)
     {
         fprintf(stderr, "Error al leer la información de networking desde /proc/net/dev\n");
         return NULL;
@@ -232,7 +232,7 @@ double* get_processes_usage()
         // Cierre del archivo recientemente creado
         close(tmp_fd);
         // Se ejecuta el comando `top` de manera tal que se pueda obtener info relacionada a los procesos del sistema
-        execlp("top", "top", "-b", "-n", "1", (char *)NULL);
+        execlp("top", "top", "-b", "-n", "1", (char*)NULL);
         // Nunca debería llegar a la sig. linea este proceso; si lo hace, es porque la linea anterior falló
         exit(-1);
     }
@@ -274,7 +274,7 @@ double* get_processes_usage()
     fclose(fp);
 
     // Verificar si se encontraron los valores
-    if(existing_processes == 0 || running_processes == 0)
+    if (existing_processes == 0 || running_processes == 0)
     {
         fprintf(stderr, "Error al leer la información de procesos desde TEMP_PROC_METRICS_FILE\n");
         return NULL;

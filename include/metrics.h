@@ -3,12 +3,12 @@
  * @brief Funciones para obtener el uso de CPU y memoria desde el sistema de archivos /proc.
  */
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/wait.h>
-#include <fcntl.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 256
 #define TEMP_PROC_METRICS_FILE "/tmp/proc_metrics.txt"

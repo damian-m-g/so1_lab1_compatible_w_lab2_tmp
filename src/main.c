@@ -4,9 +4,9 @@
  */
 
 #include "expose_metrics.h"
-#include <stdbool.h>
-#include <signal.h>
 #include <pthread.h>
+#include <signal.h>
+#include <stdbool.h>
 
 #define SLEEP_TIME 1
 #define WAITING_TIME_FOR_EXPOSE_METRICS_THREAD_TO_END 500000 // us
@@ -14,7 +14,8 @@
 static pthread_t tid;
 
 // Handler ante syscalls SIGINT y SIGTERM.
-void handle_sigint_and_sigterm(int sig) {
+void handle_sigint_and_sigterm(int sig)
+{
     // Cierre de archivo temporal, usado por update_processes_gauge() en caso de que existe
     if (access(TEMP_PROC_METRICS_FILE, F_OK) == 0)
     {

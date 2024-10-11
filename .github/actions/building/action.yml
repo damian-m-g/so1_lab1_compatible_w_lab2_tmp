@@ -28,6 +28,7 @@ runs:
           cmake ..
           make
           sudo make install
+          sleep 3
           cd ..
           cd ..
           cd ..

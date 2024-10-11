@@ -10,7 +10,10 @@ runs:
           sudo apt update
           sudo apt install libmicrohttpd-dev
           
-          cd $(pwd)/lib/prom
+          cd $(pwd)/lib
+          make
+          
+          cd prom
           mkdir build
           cd build
           cmake ..
@@ -32,4 +35,4 @@ runs:
           mkdir build
           cd build
           cmake ..
-          make
+          make all

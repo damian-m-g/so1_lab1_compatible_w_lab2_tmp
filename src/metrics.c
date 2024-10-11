@@ -1,6 +1,6 @@
 #include "metrics.h"
 
-long long unsigned* get_memory_usage()
+double* get_memory_usage()
 {
     FILE* fp;
     char buffer[BUFFER_SIZE];
@@ -37,12 +37,12 @@ long long unsigned* get_memory_usage()
     }
 
     // Calcular aquello a retornar
-    static long long unsigned metrics[4];
-    metrics[0] = total_mem;
+    static double metrics[4];
+    metrics[0] = (double)total_mem;
     long long unsigned used_mem = total_mem - free_mem;
-    metrics[1] = used_mem;
-    metrics[2] = free_mem;
-    long long unsigned mem_usage_percent = (long long unsigned)round(((double)used_mem / total_mem) * 100);
+    metrics[1] = (double)used_mem;
+    metrics[2] = (double)free_mem;
+    double mem_usage_percent = ((double)used_mem / total_mem) * 100;
     metrics[3] = mem_usage_percent;
 
     return metrics;

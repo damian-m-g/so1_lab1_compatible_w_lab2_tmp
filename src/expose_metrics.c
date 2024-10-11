@@ -26,7 +26,7 @@ void update_cpu_gauge()
 
 void update_memory_gauge()
 {
-    long long unsigned* usage = get_memory_usage();
+    double* usage = get_memory_usage();
     if (usage != NULL)
     {
         for (int i = 0; i < N_MEM_METRICS; i++)

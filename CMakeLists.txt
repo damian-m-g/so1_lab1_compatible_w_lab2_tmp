@@ -8,4 +8,4 @@ include_directories(include)
 file(GLOB SOURCES "src/*.c")
 add_executable(metrics ${SOURCES} src/main.c)
 
-target_link_libraries(metrics prom promhttp pthread m)
+target_link_libraries(metrics prom promhttp pthread)

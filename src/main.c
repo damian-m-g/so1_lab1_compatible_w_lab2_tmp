@@ -5,14 +5,26 @@
 
 #include "expose_metrics.h"
 #include <stdbool.h>
+#include <signal.h>
+#include <pthread.h>
 
 #define SLEEP_TIME 1
+#define WAITING_TIME_FOR_EXPOSE_METRICS_THREAD_TO_END 500000 // us
+
+static pthread_t tid;
+
+// Handler ante syscalls SIGINT y SIGTERM.
+void handle_sigint_and_sigterm(int sig) {
+    destroy_mutex();
+    pthread_cancel(tid);
+    // pthread_timedjoin_np() no existe en mi ver usada de glibc, por lo que uso un tiempo estandar para esperar por tid
+    usleep(WAITING_TIME_FOR_EXPOSE_METRICS_THREAD_TO_END);
+    exit(EXIT_SUCCESS);
+}
 
 int main(int argc, char* argv[])
 {
-
     // Creamos un hilo para exponer las métricas vía HTTP
-    pthread_t tid;
     if (pthread_create(&tid, NULL, expose_metrics, NULL) != 0)
     {
         fprintf(stderr, "Error al crear el hilo del servidor HTTP\n");
@@ -21,6 +33,10 @@ int main(int argc, char* argv[])
 
     init_metrics();
 
+    // Registro de signals handler para salida limpia
+    signal(SIGINT, handle_sigint_and_sigterm);
+    signal(SIGTERM, handle_sigint_and_sigterm);
+
     // Bucle principal para actualizar las métricas cada segundo
     while (true)
     {
@@ -28,8 +44,6 @@ int main(int argc, char* argv[])
         update_memory_gauge();
         sleep(SLEEP_TIME);
     }
-
-    destroy_mutex();
 
     return EXIT_SUCCESS;
 }

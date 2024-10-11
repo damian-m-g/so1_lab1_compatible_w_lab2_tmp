@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
 
 #define BUFFER_SIZE 256
 
@@ -25,7 +24,7 @@
  *   3: porcentaje de memoria disponible (rounded)
  * Devuelve NULL en caso de error.
  */
-long long unsigned* get_memory_usage();
+double* get_memory_usage();
 
 /**
  * @brief Obtiene el porcentaje de uso de CPU desde /proc/stat.

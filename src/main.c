@@ -8,12 +8,14 @@
 #include <signal.h>
 #include <stdbool.h>
 
+//! \brief Pause time between widgets update.
 #define SLEEP_TIME 1
+//! \brief Once the daemon thread running the HTTP server is set to end, wait for a moment so it ends properly.
 #define WAITING_TIME_FOR_EXPOSE_METRICS_THREAD_TO_END 500000 // us
 
 static pthread_t tid;
 
-// Handler ante syscalls SIGINT y SIGTERM.
+//! \brief Handler ante syscalls SIGINT y SIGTERM.
 void handle_sigint_and_sigterm(int sig)
 {
     // Cierre de archivo temporal, usado por update_processes_gauge() en caso de que existe
@@ -29,6 +31,7 @@ void handle_sigint_and_sigterm(int sig)
     exit(EXIT_SUCCESS);
 }
 
+//! \brief Main function of the program.
 int main(int argc, char* argv[])
 {
     // Creamos un hilo para exponer las métricas vía HTTP

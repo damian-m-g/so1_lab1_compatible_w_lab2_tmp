@@ -13,10 +13,15 @@
 #include <string.h>
 #include <unistd.h> // Para sleep
 
+//! \brief Used to hold each line read from files.
 #define BUFFER_SIZE 256
+//! \brief Number of memory metrics.
 #define N_MEM_METRICS 4
+//! \brief Number of hard disk metrics.
 #define N_DISK_METRICS 2
+//! \brief Number of network metrics.
 #define N_NET_METRICS 6
+//! \brief Number of processes metrics.
 #define N_PROC_COUNT 2
 
 /**

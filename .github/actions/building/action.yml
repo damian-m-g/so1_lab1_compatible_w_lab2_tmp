@@ -7,6 +7,29 @@ runs:
       - name: Compile
         shell: bash
         run: |
-          SRC_FOLDER=$(pwd)/src
-
-          make all
+          sudo apt update
+          sudo apt install libmicrohttpd-dev
+          
+          cd $(pwd)/lib/prom
+          mkdir build
+          cd build
+          cmake ..
+          make
+          sudo make install
+          cd ..
+          cd ..
+          
+          cd promhttp
+          mkdir build
+          cd build
+          cmake ..
+          make
+          sudo make install
+          cd ..
+          cd ..
+          cd ..
+          
+          mkdir build
+          cd build
+          cmake ..
+          make

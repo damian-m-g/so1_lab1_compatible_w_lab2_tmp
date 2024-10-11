@@ -10,7 +10,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+//! \brief Used to hold each line read from files.
 #define BUFFER_SIZE 256
+//! \brief Temporary processes metrics file absolute path.
 #define TEMP_PROC_METRICS_FILE "/tmp/proc_metrics.txt"
 
 /**

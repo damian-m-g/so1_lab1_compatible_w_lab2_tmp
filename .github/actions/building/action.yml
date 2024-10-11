@@ -7,10 +7,12 @@ runs:
       - name: Compile
         shell: bash
         run: |
+          ROOT_FOLDER=$(pwd)
+          
           sudo apt update
           sudo apt install libmicrohttpd-dev
           
-          cd $(pwd)/lib
+          cd lib
           make
           
           cd prom
@@ -28,10 +30,7 @@ runs:
           cmake ..
           make
           sudo make install
-          sleep 3
-          cd ..
-          cd ..
-          cd ..
+          cd ROOT_FOLDER
           
           mkdir build
           cd build

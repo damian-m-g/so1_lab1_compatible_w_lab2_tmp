@@ -9,7 +9,6 @@ runs:
         run: |
           ROOT_FOLDER=$(pwd)
           
-          sudo apt update
           sudo apt install libmicrohttpd-dev
           
           cd lib

@@ -16,8 +16,7 @@
  * Lee los valores de memoria total y disponible desde /proc/meminfo, y calcula
  * la memoria siendo utilizada (con su porcentaje asociado).
  *
- * @return Un puntero a array de 4 elementos long long unsigned, donde cada uno
- * representa respectivamente:
+ * @return Un puntero a array de 4 elementos double, donde cada uno representa respectivamente:
  *   0: memoria total
  *   1: memoria usada
  *   2: memoria disponible
@@ -35,3 +34,35 @@ double* get_memory_usage();
  * @return Uso de CPU como porcentaje (0.0 a 100.0), o -1.0 en caso de error.
  */
 double get_cpu_usage();
+
+/**
+ * @brief Obtiene datos de uso del disco duro desde /proc/diskstats.
+ *
+ * Ubica el disco duro único de la laptop, y obtiene la cantida de lecturas
+ * y el tiempo que le llevó realizarlas; tanto lo mismo para las escrituras.
+ *
+ * @return Un puntero a array de 2 elementos double, 2 promedios:
+ *   0: Lecturas por segundo.
+ *   1: Escrituras por segundo.
+ * Devuelve NULL en caso de error.
+ */
+double* get_disk_usage();
+
+/**
+ * @brief Obtiene datos de uso de networking de /proc/net/dev.
+ *
+ * La pandemia de Cordyceps ha generado el levantamiento de pandillas hackers
+ * que utilizan el medio aereo para realizar sus ataques. Es por esta razón que
+ * en nuestra base nos vemos obligados a no utilizar la red wireless!
+ * Ubica la NIC Ethernet de la laptop, y obtiene información de TX y RX.
+ *
+ * @return Un puntero a array de 6 elementos double:
+ *   0: Bytes RX.
+ *   1: Paquetes con errores RX.
+ *   2: Paquetes descartados en RX.
+ *   3: Bytes TX.
+ *   4: Paquetes con errores TX.
+ *   5: Paquetes descartados en TX.
+ * Devuelve NULL en caso de error.
+ */
+double* get_network_usage();

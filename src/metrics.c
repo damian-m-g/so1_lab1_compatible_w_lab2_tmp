@@ -116,3 +116,93 @@ double get_cpu_usage()
 
     return cpu_usage_percent;
 }
+
+double* get_disk_usage()
+{
+    FILE* fp;
+    char buffer[BUFFER_SIZE];
+    unsigned long long sectors_read = 0, time_spent_reading = 0, sectors_written = 0, time_spent_writting = 0;
+
+    // Abrir el archivo /proc/diskstats
+    fp = fopen("/proc/diskstats", "r");
+    if (fp == NULL)
+    {
+        perror("Error al abrir /proc/diskstats");
+        return NULL;
+    }
+
+    // Leer los valores de disco de interés
+    while (fgets(buffer, sizeof(buffer), fp) != NULL)
+    {
+        if (sscanf(buffer, "%*u       %*u sda %*u %*u %llu %llu %*u %*u %llu %llu",
+            &sectors_read, &time_spent_reading, &sectors_written, &time_spent_writting) == 4)
+        {
+            break; // Datos de sda encontrados, podemos dejar de leer
+        }
+    }
+
+    fclose(fp);
+
+    // Verificar si se encontraron los valores
+    if (sectors_read == 0 || time_spent_reading == 0 || sectors_written == 0 || time_spent_writting == 0)
+    {
+        fprintf(stderr, "Error al leer la información de disco duro desde /proc/diskstats\n");
+        return NULL;
+    }
+
+    // Calcular aquello a retornar
+    static double metrics[2];
+    metrics[0] = (double)sectors_read / time_spent_reading;
+    metrics[1] = (double)sectors_written / time_spent_writting;
+
+    return metrics;
+}
+
+double* get_network_usage()
+{
+    FILE* fp;
+    char buffer[BUFFER_SIZE];
+    unsigned long long rx_bytes = 0, rx_errors = 0, rx_packets_dropped = 0,
+        tx_bytes = 0, tx_errors = 0, tx_packets_dropped = 0;
+
+    // Abrir el archivo /proc/net/dev
+    fp = fopen("/proc/net/dev", "r");
+    if (fp == NULL)
+    {
+        perror("Error al abrir /proc/net/dev");
+        return NULL;
+    }
+
+    // Leer los valores de networking de interés
+    int data_read = 0;
+    while (fgets(buffer, sizeof(buffer), fp) != NULL)
+    {
+        if (sscanf(buffer, "en%*s %llu %*u %llu %llu %*u %*u %*u %*u %llu %*u %llu %llu",
+            &rx_bytes, &rx_errors, &rx_packets_dropped, &tx_bytes, &tx_errors, &tx_packets_dropped) == 6)
+        {
+            data_read = 1;
+            break; // Datos de sda encontrados, podemos dejar de leer
+        }
+    }
+
+    fclose(fp);
+
+    // Verificar si se encontraron los valores
+    if(data_read == 0)
+    {
+        fprintf(stderr, "Error al leer la información de networking desde /proc/net/dev\n");
+        return NULL;
+    }
+
+    // Construir aquello a retornar
+    static double metrics[6];
+    // Typecast explícito a *double* ya que los gauges de libprom trabajan con ese tipo de valor
+    metrics[0] = (double)rx_bytes;
+    metrics[1] = (double)rx_errors;
+    metrics[2] = (double)rx_packets_dropped;
+    metrics[3] = (double)tx_bytes;
+    metrics[4] = (double)tx_errors;
+    metrics[5] = (double)tx_packets_dropped;
+
+    return metrics;
+}

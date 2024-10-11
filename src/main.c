@@ -41,7 +41,11 @@ int main(int argc, char* argv[])
     while (true)
     {
         update_cpu_gauge();
-        update_memory_gauge();
+        update_memory_gauges();
+        update_disk_gauges();
+        update_network_gauges();
+        update_processes_gauge();
+        update_stat_gauges();
         sleep(SLEEP_TIME);
     }
 

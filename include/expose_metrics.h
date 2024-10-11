@@ -15,6 +15,8 @@
 
 #define BUFFER_SIZE 256
 #define N_MEM_METRICS 4
+#define N_DISK_METRICS 2
+#define N_NET_METRICS 6
 
 /**
  * @brief Actualiza la métrica de uso de CPU.
@@ -22,9 +24,29 @@
 void update_cpu_gauge();
 
 /**
- * @brief Actualiza la métrica de uso de memoria.
+ * @brief Actualiza las métricas de uso de memoria.
  */
-void update_memory_gauge();
+void update_memory_gauges();
+
+/**
+ * @brief Actualiza las métrica de uso del disco duro.
+ */
+void update_disk_gauges();
+
+/**
+ * @brief Actualiza las métrica de uso de red.
+ */
+void update_network_gauges();
+
+/**
+ * @brief Actualiza las métrica de uso de procesos.
+ */
+void update_processes_gauge();
+
+/**
+ * @brief Actualiza las métrica de uso de stats en general.
+ */
+void update_stat_gauges();
 
 /**
  * @brief Función del hilo para exponer las métricas vía HTTP en el puerto 8000.

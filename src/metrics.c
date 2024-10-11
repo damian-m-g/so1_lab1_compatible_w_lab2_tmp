@@ -137,7 +137,7 @@ double* get_disk_usage()
         if (sscanf(buffer, "%*u       %*u sda %*u %*u %llu %llu %*u %*u %llu %llu",
             &sectors_read, &time_spent_reading, &sectors_written, &time_spent_writting) == 4)
         {
-            break; // Datos de sda encontrados, podemos dejar de leer
+            break; // Datos de HDD encontrados, podemos dejar de leer
         }
     }
 
@@ -181,7 +181,7 @@ double* get_network_usage()
             &rx_bytes, &rx_errors, &rx_packets_dropped, &tx_bytes, &tx_errors, &tx_packets_dropped) == 6)
         {
             data_read = 1;
-            break; // Datos de sda encontrados, podemos dejar de leer
+            break; // Datos de networking encontrados, podemos dejar de leer
         }
     }
 
@@ -203,6 +203,87 @@ double* get_network_usage()
     metrics[3] = (double)tx_bytes;
     metrics[4] = (double)tx_errors;
     metrics[5] = (double)tx_packets_dropped;
+
+    return metrics;
+}
+
+double* get_processes_usage()
+{
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        fprintf(stderr, "No fué posible crear proceso hijo con fork() en get_processes_usage()\n");
+        return NULL;
+    }
+    else if (pid == 0)
+    {
+        int tmp_fd = open(TEMP_PROC_METRICS_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        if (tmp_fd == -1)
+        {
+            fprintf(stderr, "Error creando archivo temporal en get_processes_usage()\n");
+            exit(-1);
+        }
+        // Se redirige STDOUT al archivo temporal
+        if (dup2(tmp_fd, STDOUT_FILENO) == -1)
+        {
+            fprintf(stderr, "Error redirigiendo STDOUT en get_processes_usage()\n");
+            exit(-1);
+        }
+        // Cierre del archivo recientemente creado
+        close(tmp_fd);
+        // Se ejecuta el comando `top` de manera tal que se pueda obtener info relacionada a los procesos del sistema
+        execlp("top", "top", "-b", "-n", "1", (char *)NULL);
+        // Nunca debería llegar a la sig. linea este proceso; si lo hace, es porque la linea anterior falló
+        exit(-1);
+    }
+    // Esperar por el proceso hijo a que finalice lo que debe hacer
+    int status;
+    if (waitpid(pid, &status, 0) == -1)
+    {
+        fprintf(stderr, "Error en waitpid() en get_processes_usage()\n");
+        return NULL;
+    }
+    if (WEXITSTATUS(status) == -1)
+    {
+        fprintf(stderr, "Error en proceso forked en get_processes_usage()\n");
+        return NULL;
+    }
+
+    // Parte scraping el archivo temporal
+    FILE* fp;
+    char buffer[BUFFER_SIZE];
+    unsigned int existing_processes = 0, running_processes = 0;
+
+    // Abrir el archivo temporal
+    fp = fopen(TEMP_PROC_METRICS_FILE, "r");
+    if (fp == NULL)
+    {
+        perror("Error al abrir TEMP_PROC_METRICS_FILE");
+        return NULL;
+    }
+
+    // Lectura de los valores de interés
+    while (fgets(buffer, sizeof(buffer), fp) != NULL)
+    {
+        if (sscanf(buffer, "Tasks: %u total, %u", &existing_processes, &running_processes) == 2)
+        {
+            break; // Datos de procesos encontrados, podemos dejar de leer
+        }
+    }
+
+    fclose(fp);
+
+    // Verificar si se encontraron los valores
+    if(existing_processes == 0 || running_processes == 0)
+    {
+        fprintf(stderr, "Error al leer la información de procesos desde TEMP_PROC_METRICS_FILE\n");
+        return NULL;
+    }
+
+    // Construir aquello a retornar
+    static double metrics[2];
+    metrics[0] = (double)existing_processes;
+    metrics[1] = (double)running_processes;
 
     return metrics;
 }

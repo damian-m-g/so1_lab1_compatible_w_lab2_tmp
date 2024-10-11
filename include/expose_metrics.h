@@ -17,6 +17,7 @@
 #define N_MEM_METRICS 4
 #define N_DISK_METRICS 2
 #define N_NET_METRICS 6
+#define N_PROC_COUNT 2
 
 /**
  * @brief Actualiza la métrica de uso de CPU.

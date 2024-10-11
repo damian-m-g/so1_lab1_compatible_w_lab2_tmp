@@ -11,6 +11,8 @@ static prom_gauge_t* memory_metrics[N_MEM_METRICS];
 static prom_gauge_t* disk_metrics[N_DISK_METRICS];
 /** Métrica de Prometheus para el uso de disco */
 static prom_gauge_t* network_metrics[N_NET_METRICS];
+/** Métrica de Prometheus para el conteo de procesos */
+static prom_gauge_t* processes_count[N_PROC_COUNT];
 
 void update_cpu_gauge()
 {
@@ -81,10 +83,22 @@ void update_network_gauges()
     }
 }
 
-// WIP: ...
 void update_processes_gauge()
 {
-
+    double* usage = get_processes_usage();
+    if (usage != NULL)
+    {
+        for (int i = 0; i < N_PROC_COUNT; i++)
+        {
+            pthread_mutex_lock(&lock);
+            prom_gauge_set(processes_count[i], usage[i], NULL);
+            pthread_mutex_unlock(&lock);
+        }
+    }
+    else
+    {
+        fprintf(stderr, "Error al obtener el uso de procesos\n");
+    }
 }
 
 // TODO: ...
@@ -191,6 +205,19 @@ int init_metrics()
         }
     }
 
+    // Creamos las métricas relacionadas a los procesos del sistema
+    processes_count[0] = prom_gauge_new("existing_processes", "Procesos existentes en el sistema", 0, NULL);
+    processes_count[1] = prom_gauge_new("running_processes", "Procesos actualmente corriendo en el sistema", 0, NULL);
+    // Chequear que todo haya ido bien
+    for (int i = 0; i < N_PROC_COUNT; i++)
+    {
+        if (processes_count[i] == NULL)
+        {
+            fprintf(stderr, "Error al crear las métricas de uso de procesos\n");
+            return EXIT_FAILURE;
+        }
+    }
+
     /* REGISTRO DE MÉTRICAS */
 
     // Registramos las métricas en el registro por defecto, para el uso de CPU
@@ -226,6 +253,16 @@ int init_metrics()
         if (pcr_must_register_metric(network_metrics[i]) == NULL)
         {
             fprintf(stderr, "Error al registrar las métricas de networking\n");
+            return EXIT_FAILURE;
+        }
+    }
+
+    // Registramos las métricas en el registro por defecto, para procesos del sistema
+    for (int i = 0; i < N_PROC_COUNT; i++)
+    {
+        if (pcr_must_register_metric(processes_count[i]) == NULL)
+        {
+            fprintf(stderr, "Error al registrar las métricas de uso de procesos\n");
             return EXIT_FAILURE;
         }
     }

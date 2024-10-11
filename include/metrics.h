@@ -7,8 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 
 #define BUFFER_SIZE 256
+#define TEMP_PROC_METRICS_FILE "/tmp/proc_metrics.txt"
 
 /**
  * @brief Obtiene datos de la memoria principal desde /proc/meminfo.
@@ -66,3 +69,16 @@ double* get_disk_usage();
  * Devuelve NULL en caso de error.
  */
 double* get_network_usage();
+
+/**
+ * @brief Obtiene datos de uso de procesos utilizando el comando top.
+ *
+ * Se vuelca el contenido del comando top en un archivo temporario,
+ * luego se scrapea para obtener la información deseada.
+ *
+ * @return Un puntero a array de 2 elementos double:
+ *   0: Procesos existentes.
+ *   1: Procesos running.
+ * Devuelve NULL en caso de error.
+ */
+double* get_processes_usage();

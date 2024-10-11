@@ -15,6 +15,12 @@ static pthread_t tid;
 
 // Handler ante syscalls SIGINT y SIGTERM.
 void handle_sigint_and_sigterm(int sig) {
+    // Cierre de archivo temporal, usado por update_processes_gauge() en caso de que existe
+    if (access(TEMP_PROC_METRICS_FILE, F_OK) == 0)
+    {
+        remove(TEMP_PROC_METRICS_FILE);
+    }
+    // Destrucción de mutex y terminación de thread del servidor Prometheus
     destroy_mutex();
     pthread_cancel(tid);
     // pthread_timedjoin_np() no existe en mi ver usada de glibc, por lo que uso un tiempo estandar para esperar por tid

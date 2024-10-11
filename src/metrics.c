@@ -1,6 +1,6 @@
 #include "metrics.h"
 
-double get_memory_usage()
+long long unsigned* get_memory_usage()
 {
     FILE* fp;
     char buffer[BUFFER_SIZE];
@@ -11,7 +11,7 @@ double get_memory_usage()
     if (fp == NULL)
     {
         perror("Error al abrir /proc/meminfo");
-        return -1.0;
+        return NULL;
     }
 
     // Leer los valores de memoria total y disponible
@@ -33,14 +33,19 @@ double get_memory_usage()
     if (total_mem == 0 || free_mem == 0)
     {
         fprintf(stderr, "Error al leer la información de memoria desde /proc/meminfo\n");
-        return -1.0;
+        return NULL;
     }
 
-    // Calcular el porcentaje de uso de memoria
-    double used_mem = total_mem - free_mem;
-    double mem_usage_percent = (used_mem / total_mem) * 100.0;
+    // Calcular aquello a retornar
+    static long long unsigned metrics[4];
+    metrics[0] = total_mem;
+    long long unsigned used_mem = total_mem - free_mem;
+    metrics[1] = used_mem;
+    metrics[2] = free_mem;
+    long long unsigned mem_usage_percent = (long long unsigned)round(((double)used_mem / total_mem) * 100);
+    metrics[3] = mem_usage_percent;
 
-    return mem_usage_percent;
+    return metrics;
 }
 
 double get_cpu_usage()
@@ -97,7 +102,7 @@ double get_cpu_usage()
     }
 
     // Calcular el porcentaje de uso de CPU
-    cpu_usage_percent = ((double)(totald - idled) / totald) * 100.0;
+    cpu_usage_percent = ((double)(totald - idled) / (double)totald) * 100.0;
 
     // Actualizar los valores anteriores para la siguiente lectura
     prev_user = user;

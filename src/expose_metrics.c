@@ -7,7 +7,7 @@ pthread_mutex_t lock;
 static prom_gauge_t* cpu_usage_metric;
 
 /** Métrica de Prometheus para el uso de memoria */
-static prom_gauge_t* memory_usage_metric;
+static prom_gauge_t* memory_metrics[N_MEM_METRICS];
 
 void update_cpu_gauge()
 {
@@ -26,12 +26,15 @@ void update_cpu_gauge()
 
 void update_memory_gauge()
 {
-    double usage = get_memory_usage();
-    if (usage >= 0)
+    long long unsigned* usage = get_memory_usage();
+    if (usage != NULL)
     {
-        pthread_mutex_lock(&lock);
-        prom_gauge_set(memory_usage_metric, usage, NULL);
-        pthread_mutex_unlock(&lock);
+        for (int i = 0; i < N_MEM_METRICS; i++)
+        {
+            pthread_mutex_lock(&lock);
+            prom_gauge_set(memory_metrics[i], usage[i], NULL);
+            pthread_mutex_unlock(&lock);
+        }
     }
     else
     {
@@ -65,7 +68,7 @@ void* expose_metrics(void* arg)
     return NULL;
 }
 
-void init_metrics()
+int init_metrics()
 {
     // Inicializamos el mutex
     if (pthread_mutex_init(&lock, NULL) != 0)
@@ -75,7 +78,7 @@ void init_metrics()
     }
 
     // Inicializamos el registro de coleccionistas de Prometheus
-    if (prom_collector_registry_default_init() != 0)
+    if (pcr_default_init() != 0)
     {
         fprintf(stderr, "Error al inicializar el registro de Prometheus\n");
         return EXIT_FAILURE;
@@ -89,21 +92,38 @@ void init_metrics()
         return EXIT_FAILURE;
     }
 
-    // Creamos la métrica para el uso de memoria
-    memory_usage_metric = prom_gauge_new("memory_usage_percentage", "Porcentaje de uso de memoria", 0, NULL);
-    if (memory_usage_metric == NULL)
+    // Creamos las métricas para el uso de memoria
+    memory_metrics[0] = prom_gauge_new("memory_total", "Memoria total", 0, NULL);
+    memory_metrics[1] = prom_gauge_new("memory_used", "Memoria en uso", 0, NULL);
+    memory_metrics[2] = prom_gauge_new("memory_free", "Memoria libre", 0, NULL);
+    memory_metrics[3] = prom_gauge_new("memory_free_percentage", "Porcentaje de memoria libre", 0, NULL);
+    // Chequear que todo haya ido bien
+    for (int i = 0; i < N_MEM_METRICS; i++)
     {
-        fprintf(stderr, "Error al crear la métrica de uso de memoria\n");
+        if (memory_metrics[i] == NULL)
+        {
+            fprintf(stderr, "Error al crear las métricas de uso de memoria\n");
+            return EXIT_FAILURE;
+        }
+    }
+
+    // Registramos las métricas en el registro por defecto, para el uso de memoria
+    for (int i = 0; i < N_MEM_METRICS; i++)
+    {
+        if (pcr_must_register_metric(memory_metrics[i]) == NULL)
+        {
+            fprintf(stderr, "Error al registrar las métricas de memoria\n");
+            return EXIT_FAILURE;
+        }
+    }
+    // Registramos las métricas en el registro por defecto, para el uso de CPU
+    if (pcr_must_register_metric(cpu_usage_metric) == NULL)
+    {
+        fprintf(stderr, "Error al registrar la métrica de CPU\n");
         return EXIT_FAILURE;
     }
 
-    // Registramos las métricas en el registro por defecto
-    if (prom_collector_registry_must_register_metric(cpu_usage_metric) != 0 ||
-        prom_collector_registry_must_register_metric(memory_usage_metric) != 0)
-    {
-        fprintf(stderr, "Error al registrar las métricas\n");
-        return EXIT_FAILURE;
-    }
+    return EXIT_SUCCESS;
 }
 
 void destroy_mutex()

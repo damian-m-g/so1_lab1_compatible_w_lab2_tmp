@@ -7,18 +7,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 
 #define BUFFER_SIZE 256
 
 /**
- * @brief Obtiene el porcentaje de uso de memoria desde /proc/meminfo.
+ * @brief Obtiene datos de la memoria principal desde /proc/meminfo.
  *
- * Lee los valores de memoria total y disponible desde /proc/meminfo y calcula
- * el porcentaje de uso de memoria.
+ * Lee los valores de memoria total y disponible desde /proc/meminfo, y calcula
+ * la memoria siendo utilizada (con su porcentaje asociado).
  *
- * @return Uso de memoria como porcentaje (0.0 a 100.0), o -1.0 en caso de error.
+ * @return Un puntero a array de 4 elementos long long unsigned, donde cada uno
+ * representa respectivamente:
+ *   0: memoria total
+ *   1: memoria usada
+ *   2: memoria disponible
+ *   3: porcentaje de memoria disponible (rounded)
+ * Devuelve NULL en caso de error.
  */
-double get_memory_usage();
+long long unsigned* get_memory_usage();
 
 /**
  * @brief Obtiene el porcentaje de uso de CPU desde /proc/stat.

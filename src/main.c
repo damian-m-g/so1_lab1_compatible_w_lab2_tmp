@@ -19,6 +19,8 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    init_metrics();
+
     // Bucle principal para actualizar las métricas cada segundo
     while (true)
     {
@@ -26,6 +28,8 @@ int main(int argc, char* argv[])
         update_memory_gauge();
         sleep(SLEEP_TIME);
     }
+
+    destroy_mutex();
 
     return EXIT_SUCCESS;
 }

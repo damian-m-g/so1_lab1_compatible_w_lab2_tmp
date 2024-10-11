@@ -4,10 +4,9 @@
  */
 
 #include "metrics.h"
-#include "read_cpu_usage.h"
 #include <errno.h>
-#include <prom.h>
-#include <promhttp.h>
+#include <libprom/prom.h>
+#include <libprom/promhttp.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +14,7 @@
 #include <unistd.h> // Para sleep
 
 #define BUFFER_SIZE 256
+#define N_MEM_METRICS 4
 
 /**
  * @brief Actualiza la métrica de uso de CPU.
@@ -36,7 +36,7 @@ void* expose_metrics(void* arg);
 /**
  * @brief Inicializar mutex y métricas.
  */
-void init_metrics();
+int init_metrics();
 
 /**
  * @brief Destructor de mutex

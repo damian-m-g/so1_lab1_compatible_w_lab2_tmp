@@ -31,3 +31,8 @@
 # cache
 .cache/
 
+# CLion build directory
+/cmake-build-debug/
+
+# others
+PERSONAL.txt

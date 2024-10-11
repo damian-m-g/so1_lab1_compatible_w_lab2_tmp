@@ -8,30 +8,49 @@ runs:
         shell: bash
         run: |
           ROOT_FOLDER=$(pwd)
-          
+          echo "debug"
           sudo apt install libmicrohttpd-dev
-          
+          echo "debug"
           cd lib
+          echo "debug"
           make
-          
+          echo "debug"
           cd prom
+          echo "debug"
           mkdir build
+          echo "debug"
           cd build
+          echo "debug"
           cmake ..
+          echo "debug"
           make
+          echo "debug"
           sudo make install
+          echo "debug"
           cd ..
+          echo "debug"
           cd ..
+          echo "debug"
           
           cd promhttp
+          echo "debug"
           mkdir build
+          echo "debug"
           cd build
+          echo "debug"
           cmake ..
+          echo "debug"
           make
+          echo "debug"
           sudo make install
+          echo "debug"
           cd ROOT_FOLDER
-          
+          echo "debug"
           mkdir build
+          echo "debug"
           cd build
+          echo "debug"
           cmake ..
+          echo "debug"
           make all
+          echo "debug"

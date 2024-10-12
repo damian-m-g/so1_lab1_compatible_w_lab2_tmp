@@ -7,7 +7,6 @@ runs:
       - name: Compile
         shell: bash
         run: |
-          ROOT_FOLDER=$(pwd)
           sudo apt install libmicrohttpd-dev
           cd lib
           make
@@ -26,7 +25,10 @@ runs:
           cmake ..
           make
           sudo make install
-          cd ROOT_FOLDER
+          cd ..
+          cd ..
+          cd ..
+          
           mkdir -p build
           cd build
           cmake ..

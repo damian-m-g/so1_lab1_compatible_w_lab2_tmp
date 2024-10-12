@@ -8,49 +8,49 @@ runs:
         shell: bash
         run: |
           ROOT_FOLDER=$(pwd)
-          echo "debug"
+          stdbuf -oL echo "debug"
           sudo apt install libmicrohttpd-dev
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd lib
-          echo "debug"
+          stdbuf -oL echo "debug"
           make
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd prom
-          echo "debug"
+          stdbuf -oL echo "debug"
           mkdir build
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd build
-          echo "debug"
+          stdbuf -oL echo "debug"
           cmake ..
-          echo "debug"
+          stdbuf -oL echo "debug"
           make
-          echo "debug"
+          stdbuf -oL echo "debug"
           sudo make install
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd ..
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd ..
-          echo "debug"
+          stdbuf -oL echo "debug"
           
           cd promhttp
-          echo "debug"
+          stdbuf -oL echo "debug"
           mkdir build
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd build
-          echo "debug"
+          stdbuf -oL echo "debug"
           cmake ..
-          echo "debug"
+          stdbuf -oL echo "debug"
           make
-          echo "debug"
+          stdbuf -oL echo "debug"
           sudo make install
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd ROOT_FOLDER
-          echo "debug"
+          stdbuf -oL echo "debug"
           mkdir build
-          echo "debug"
+          stdbuf -oL echo "debug"
           cd build
-          echo "debug"
+          stdbuf -oL echo "debug"
           cmake ..
-          echo "debug"
+          stdbuf -oL echo "debug"
           make all
-          echo "debug"
+          stdbuf -oL echo "debug"

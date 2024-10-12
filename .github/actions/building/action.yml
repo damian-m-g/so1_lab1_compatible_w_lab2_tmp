@@ -7,50 +7,26 @@ runs:
       - name: Compile
         shell: bash
         run: |
-          ROOT_FOLDER=$(pwd)
-          stdbuf -oL echo "debug"
           sudo apt install libmicrohttpd-dev
-          stdbuf -oL echo "debug"
           cd lib
-          stdbuf -oL echo "debug"
           make
-          stdbuf -oL echo "debug"
           cd prom
-          stdbuf -oL echo "debug"
-          mkdir build
-          stdbuf -oL echo "debug"
+          mkdir -p build
           cd build
-          stdbuf -oL echo "debug"
           cmake ..
-          stdbuf -oL echo "debug"
           make
-          stdbuf -oL echo "debug"
           sudo make install
-          stdbuf -oL echo "debug"
           cd ..
-          stdbuf -oL echo "debug"
           cd ..
-          stdbuf -oL echo "debug"
           
           cd promhttp
-          stdbuf -oL echo "debug"
-          mkdir build
-          stdbuf -oL echo "debug"
+          mkdir -p build
           cd build
-          stdbuf -oL echo "debug"
           cmake ..
-          stdbuf -oL echo "debug"
           make
-          stdbuf -oL echo "debug"
           sudo make install
-          stdbuf -oL echo "debug"
           cd ROOT_FOLDER
-          stdbuf -oL echo "debug"
-          mkdir build
-          stdbuf -oL echo "debug"
+          mkdir -p build
           cd build
-          stdbuf -oL echo "debug"
           cmake ..
-          stdbuf -oL echo "debug"
           make all
-          stdbuf -oL echo "debug"

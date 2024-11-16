@@ -28,7 +28,7 @@
  *   3: porcentaje de memoria disponible (rounded)
  * Devuelve NULL en caso de error.
  */
-double* get_memory_usage();
+double* get_memory_usage(void);
 
 /**
  * @brief Obtiene el porcentaje de uso de CPU desde /proc/stat.
@@ -38,7 +38,7 @@ double* get_memory_usage();
  *
  * @return Uso de CPU como porcentaje (0.0 a 100.0), o -1.0 en caso de error.
  */
-double get_cpu_usage();
+double get_cpu_usage(void);
 
 /**
  * @brief Obtiene datos de uso del disco duro desde /proc/diskstats.
@@ -51,7 +51,7 @@ double get_cpu_usage();
  *   1: Escrituras por segundo.
  * Devuelve NULL en caso de error.
  */
-double* get_disk_usage();
+double* get_disk_usage(void);
 
 /**
  * @brief Obtiene datos de uso de networking de /proc/net/dev.
@@ -70,7 +70,7 @@ double* get_disk_usage();
  *   5: Paquetes descartados en TX.
  * Devuelve NULL en caso de error.
  */
-double* get_network_usage();
+double* get_network_usage(void);
 
 /**
  * @brief Obtiene datos de uso de procesos utilizando el comando top.
@@ -83,4 +83,4 @@ double* get_network_usage();
  *   1: Procesos running.
  * Devuelve NULL en caso de error.
  */
-double* get_processes_usage();
+double* get_processes_usage(void);

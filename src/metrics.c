@@ -1,6 +1,6 @@
 #include "metrics.h"
 
-double* get_memory_usage()
+double* get_memory_usage(void)
 {
     FILE* fp;
     char buffer[BUFFER_SIZE];
@@ -48,7 +48,7 @@ double* get_memory_usage()
     return metrics;
 }
 
-double get_cpu_usage()
+double get_cpu_usage(void)
 {
     static unsigned long long prev_user = 0, prev_nice = 0, prev_system = 0, prev_idle = 0, prev_iowait = 0,
                               prev_irq = 0, prev_softirq = 0, prev_steal = 0;
@@ -117,7 +117,7 @@ double get_cpu_usage()
     return cpu_usage_percent;
 }
 
-double* get_disk_usage()
+double* get_disk_usage(void)
 {
     FILE* fp;
     char buffer[BUFFER_SIZE];
@@ -158,7 +158,7 @@ double* get_disk_usage()
     return metrics;
 }
 
-double* get_network_usage()
+double* get_network_usage(void)
 {
     FILE* fp;
     char buffer[BUFFER_SIZE];
@@ -207,7 +207,7 @@ double* get_network_usage()
     return metrics;
 }
 
-double* get_processes_usage()
+double* get_processes_usage(void)
 {
     pid_t pid = fork();
     if (pid < 0)

@@ -23,7 +23,7 @@ extern unsigned char config[];
  */
 unsigned char g_status[G_STATUS_N_METRICS_TRACKED] = {0};
 
-void update_cpu_gauge()
+void update_cpu_gauge(void)
 {
     double usage = get_cpu_usage();
     if (usage >= 0)
@@ -41,7 +41,7 @@ void update_cpu_gauge()
     }
 }
 
-void update_memory_gauges()
+void update_memory_gauges(void)
 {
     double* usage = get_memory_usage();
     if (usage != NULL)
@@ -62,7 +62,7 @@ void update_memory_gauges()
     }
 }
 
-void update_disk_gauges()
+void update_disk_gauges(void)
 {
     double* usage = get_disk_usage();
     if (usage != NULL)
@@ -84,7 +84,7 @@ void update_disk_gauges()
     }
 }
 
-void update_network_gauges()
+void update_network_gauges(void)
 {
     double* usage = get_network_usage();
     if (usage != NULL)
@@ -102,7 +102,7 @@ void update_network_gauges()
     }
 }
 
-void update_processes_gauge()
+void update_processes_gauge(void)
 {
     double* usage = get_processes_usage();
     if (usage != NULL)
@@ -146,7 +146,7 @@ void* expose_metrics(void* arg)
     return NULL;
 }
 
-int init_metrics()
+int init_metrics(void)
 {
     // Inicializamos el mutex
     if (pthread_mutex_init(&lock, NULL) != 0)
@@ -312,7 +312,7 @@ int init_metrics()
     return EXIT_SUCCESS;
 }
 
-void destroy_mutex()
+void destroy_mutex(void)
 {
     pthread_mutex_destroy(&lock);
 }

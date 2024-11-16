@@ -29,27 +29,27 @@
 /**
  * @brief Actualiza la métrica de uso de CPU.
  */
-void update_cpu_gauge();
+void update_cpu_gauge(void);
 
 /**
  * @brief Actualiza las métricas de uso de memoria.
  */
-void update_memory_gauges();
+void update_memory_gauges(void);
 
 /**
  * @brief Actualiza las métrica de uso del disco duro.
  */
-void update_disk_gauges();
+void update_disk_gauges(void);
 
 /**
  * @brief Actualiza las métrica de uso de red.
  */
-void update_network_gauges();
+void update_network_gauges(void);
 
 /**
  * @brief Actualiza las métrica de uso de procesos.
  */
-void update_processes_gauge();
+void update_processes_gauge(void);
 
 /**
  * @brief Función del hilo para exponer las métricas vía HTTP en el puerto 8000.
@@ -61,9 +61,9 @@ void* expose_metrics(void* arg);
 /**
  * @brief Inicializar mutex y métricas.
  */
-int init_metrics();
+int init_metrics(void);
 
 /**
  * @brief Destructor de mutex
  */
-void destroy_mutex();
+void destroy_mutex(void);

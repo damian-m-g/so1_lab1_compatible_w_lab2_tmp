@@ -13,12 +13,24 @@ static prom_gauge_t* disk_metrics[N_DISK_METRICS];
 static prom_gauge_t* network_metrics[N_NET_METRICS];
 /** Métrica de Prometheus para el conteo de procesos */
 static prom_gauge_t* processes_count[N_PROC_COUNT];
+/** Configuration data array. Gets value in main.c */
+extern unsigned char config[];
+/** Estado general del programa (métricas) para reporte via SIGUSR1
+ * 0 - cpu_usage_percentage
+ * 1 - memory_used_percentage
+ * 2 - sectors_read_rate
+ * 3 - sectors_written_rate
+ */
+unsigned char g_status[G_STATUS_N_METRICS_TRACKED] = {0};
 
 void update_cpu_gauge()
 {
     double usage = get_cpu_usage();
     if (usage >= 0)
     {
+        // Trackeo interno de estado general
+        g_status[0] = (unsigned char)usage;
+        // Trackeo del propio Prometheus
         pthread_mutex_lock(&lock);
         prom_gauge_set(cpu_usage_metric, usage, NULL);
         pthread_mutex_unlock(&lock);
@@ -34,6 +46,9 @@ void update_memory_gauges()
     double* usage = get_memory_usage();
     if (usage != NULL)
     {
+        // Trackeo interno de estado general
+        g_status[1] = (unsigned char)usage[3];
+        // Trackeo del propio Prometheus
         for (int i = 0; i < N_MEM_METRICS; i++)
         {
             pthread_mutex_lock(&lock);
@@ -52,6 +67,10 @@ void update_disk_gauges()
     double* usage = get_disk_usage();
     if (usage != NULL)
     {
+        // Trackeo interno de estado general; puede haber overflow, asi que se implementan medidas
+        g_status[2] = usage[0] >= 255 ? 255 : (unsigned char)usage[0];
+        g_status[3] = usage[1] >= 255 ? 255 : (unsigned char)usage[1];
+        // Trackeo del propio Prometheus
         for (int i = 0; i < N_DISK_METRICS; i++)
         {
             pthread_mutex_lock(&lock);
@@ -145,118 +164,148 @@ int init_metrics()
 
     /* CREACIÓN DE MÉTRICAS */
 
-    // Creamos la métrica para el uso de CPU
-    cpu_usage_metric = prom_gauge_new("cpu_usage_percentage", "Porcentaje de uso de CPU", 0, NULL);
-    if (cpu_usage_metric == NULL)
+    // Creamos la métrica para el uso de CPU, if required
+    if (config[1])
     {
-        fprintf(stderr, "Error al crear la métrica de uso de CPU\n");
-        return EXIT_FAILURE;
-    }
-
-    // Creamos las métricas para el uso de memoria
-    memory_metrics[0] = prom_gauge_new("memory_total", "Memoria total", 0, NULL);
-    memory_metrics[1] = prom_gauge_new("memory_used", "Memoria en uso", 0, NULL);
-    memory_metrics[2] = prom_gauge_new("memory_free", "Memoria libre", 0, NULL);
-    memory_metrics[3] = prom_gauge_new("memory_used_percentage", "Porcentaje de memoria en uso", 0, NULL);
-    // Chequear que todo haya ido bien
-    for (int i = 0; i < N_MEM_METRICS; i++)
-    {
-        if (memory_metrics[i] == NULL)
+        cpu_usage_metric = prom_gauge_new("cpu_usage_percentage", "Porcentaje de uso de CPU", 0, NULL);
+        if (cpu_usage_metric == NULL)
         {
-            fprintf(stderr, "Error al crear las métricas de uso de memoria\n");
+            fprintf(stderr, "Error al crear la métrica de uso de CPU\n");
             return EXIT_FAILURE;
         }
     }
 
-    // Creamos las métricas para el uso del disco duro
-    disk_metrics[0] = prom_gauge_new("sectors_read_rate", "Sectores (512 KB c/u) de HDD leidos p/s", 0, NULL);
-    disk_metrics[1] = prom_gauge_new("sectors_written_rate", "Sectores (512 KB c/u) de HDD escritos p/s", 0, NULL);
-    // Chequear que todo haya ido bien
-    for (int i = 0; i < N_DISK_METRICS; i++)
+    // Creamos las métricas para el uso de memoria, if required
+    if (config[2])
     {
-        if (disk_metrics[i] == NULL)
+        memory_metrics[0] = prom_gauge_new("memory_total", "Memoria total", 0, NULL);
+        memory_metrics[1] = prom_gauge_new("memory_used", "Memoria en uso", 0, NULL);
+        memory_metrics[2] = prom_gauge_new("memory_free", "Memoria libre", 0, NULL);
+        memory_metrics[3] = prom_gauge_new("memory_used_percentage", "Porcentaje de memoria en uso", 0, NULL);
+        // Chequear que todo haya ido bien
+        for (int i = 0; i < N_MEM_METRICS; i++)
         {
-            fprintf(stderr, "Error al crear las métricas de uso del disco duro\n");
-            return EXIT_FAILURE;
+            if (memory_metrics[i] == NULL)
+            {
+                fprintf(stderr, "Error al crear las métricas de uso de memoria\n");
+                return EXIT_FAILURE;
+            }
         }
     }
 
-    // Creamos las métricas para el uso de networking
-    network_metrics[0] = prom_gauge_new("rx_bytes", "RX Bytes", 0, NULL);
-    network_metrics[1] = prom_gauge_new("rx_errors", "RX packets with errors", 0, NULL);
-    network_metrics[2] = prom_gauge_new("rx_packets_dropped", "RX packets dropped", 0, NULL);
-    network_metrics[3] = prom_gauge_new("tx_bytes", "TX Bytes", 0, NULL);
-    network_metrics[4] = prom_gauge_new("tx_errors", "TX packets with errors", 0, NULL);
-    network_metrics[5] = prom_gauge_new("tx_packets_dropped", "TX packets dropped", 0, NULL);
-    // Chequear que todo haya ido bien
-    for (int i = 0; i < N_NET_METRICS; i++)
+    // Creamos las métricas para el uso del disco duro, if required
+    if (config[3])
     {
-        if (network_metrics[i] == NULL)
+        disk_metrics[0] = prom_gauge_new("sectors_read_rate", "Sectores (512 KB c/u) de HDD leidos p/s", 0, NULL);
+        disk_metrics[1] = prom_gauge_new("sectors_written_rate", "Sectores (512 KB c/u) de HDD escritos p/s", 0, NULL);
+        // Chequear que todo haya ido bien
+        for (int i = 0; i < N_DISK_METRICS; i++)
         {
-            fprintf(stderr, "Error al crear las métricas de uso de networking\n");
-            return EXIT_FAILURE;
+            if (disk_metrics[i] == NULL)
+            {
+                fprintf(stderr, "Error al crear las métricas de uso del disco duro\n");
+                return EXIT_FAILURE;
+            }
         }
     }
 
-    // Creamos las métricas relacionadas a los procesos del sistema
-    processes_count[0] = prom_gauge_new("existing_processes", "Procesos existentes en el sistema", 0, NULL);
-    processes_count[1] = prom_gauge_new("running_processes", "Procesos actualmente corriendo en el sistema", 0, NULL);
-    // Chequear que todo haya ido bien
-    for (int i = 0; i < N_PROC_COUNT; i++)
+    // Creamos las métricas para el uso de networking, if required
+    if (config[4])
     {
-        if (processes_count[i] == NULL)
+        network_metrics[0] = prom_gauge_new("rx_bytes", "RX Bytes", 0, NULL);
+        network_metrics[1] = prom_gauge_new("rx_errors", "RX packets with errors", 0, NULL);
+        network_metrics[2] = prom_gauge_new("rx_packets_dropped", "RX packets dropped", 0, NULL);
+        network_metrics[3] = prom_gauge_new("tx_bytes", "TX Bytes", 0, NULL);
+        network_metrics[4] = prom_gauge_new("tx_errors", "TX packets with errors", 0, NULL);
+        network_metrics[5] = prom_gauge_new("tx_packets_dropped", "TX packets dropped", 0, NULL);
+        // Chequear que todo haya ido bien
+        for (int i = 0; i < N_NET_METRICS; i++)
         {
-            fprintf(stderr, "Error al crear las métricas de uso de procesos\n");
-            return EXIT_FAILURE;
+            if (network_metrics[i] == NULL)
+            {
+                fprintf(stderr, "Error al crear las métricas de uso de networking\n");
+                return EXIT_FAILURE;
+            }
+        }
+    }
+
+    // Creamos las métricas relacionadas a los procesos del sistema, if required
+    if (config[5])
+    {
+        processes_count[0] = prom_gauge_new("existing_processes", "Procesos existentes en el sistema", 0, NULL);
+        processes_count[1] = prom_gauge_new("running_processes", "Procesos actualmente corriendo en el sistema", 0, NULL);
+        // Chequear que todo haya ido bien
+        for (int i = 0; i < N_PROC_COUNT; i++)
+        {
+            if (processes_count[i] == NULL)
+            {
+                fprintf(stderr, "Error al crear las métricas de uso de procesos\n");
+                return EXIT_FAILURE;
+            }
         }
     }
 
     /* REGISTRO DE MÉTRICAS */
 
-    // Registramos las métricas en el registro por defecto, para el uso de CPU
-    if (pcr_must_register_metric(cpu_usage_metric) == NULL)
+    // Registramos las métricas en el registro por defecto, para el uso de CPU, if required
+    if (config[1])
     {
-        fprintf(stderr, "Error al registrar la métrica de CPU\n");
-        return EXIT_FAILURE;
-    }
-
-    // Registramos las métricas en el registro por defecto, para el uso de memoria
-    for (int i = 0; i < N_MEM_METRICS; i++)
-    {
-        if (pcr_must_register_metric(memory_metrics[i]) == NULL)
+        if (pcr_must_register_metric(cpu_usage_metric) == NULL)
         {
-            fprintf(stderr, "Error al registrar las métricas de memoria\n");
+            fprintf(stderr, "Error al registrar la métrica de CPU\n");
             return EXIT_FAILURE;
         }
     }
 
-    // Registramos las métricas en el registro por defecto, para el uso del disco duro
-    for (int i = 0; i < N_DISK_METRICS; i++)
+    // Registramos las métricas en el registro por defecto, para el uso de memoria, if required
+    if (config[2])
     {
-        if (pcr_must_register_metric(disk_metrics[i]) == NULL)
+        for (int i = 0; i < N_MEM_METRICS; i++)
         {
-            fprintf(stderr, "Error al registrar las métricas del disco duro\n");
-            return EXIT_FAILURE;
+            if (pcr_must_register_metric(memory_metrics[i]) == NULL)
+            {
+                fprintf(stderr, "Error al registrar las métricas de memoria\n");
+                return EXIT_FAILURE;
+            }
         }
     }
 
-    // Registramos las métricas en el registro por defecto, para el uso de networking
-    for (int i = 0; i < N_NET_METRICS; i++)
+    // Registramos las métricas en el registro por defecto, para el uso del disco duro, if required
+    if (config[3])
     {
-        if (pcr_must_register_metric(network_metrics[i]) == NULL)
+        for (int i = 0; i < N_DISK_METRICS; i++)
         {
-            fprintf(stderr, "Error al registrar las métricas de networking\n");
-            return EXIT_FAILURE;
+            if (pcr_must_register_metric(disk_metrics[i]) == NULL)
+            {
+                fprintf(stderr, "Error al registrar las métricas del disco duro\n");
+                return EXIT_FAILURE;
+            }
         }
     }
 
-    // Registramos las métricas en el registro por defecto, para procesos del sistema
-    for (int i = 0; i < N_PROC_COUNT; i++)
+    // Registramos las métricas en el registro por defecto, para el uso de networking, if required
+    if (config[4])
     {
-        if (pcr_must_register_metric(processes_count[i]) == NULL)
+        for (int i = 0; i < N_NET_METRICS; i++)
         {
-            fprintf(stderr, "Error al registrar las métricas de uso de procesos\n");
-            return EXIT_FAILURE;
+            if (pcr_must_register_metric(network_metrics[i]) == NULL)
+            {
+                fprintf(stderr, "Error al registrar las métricas de networking\n");
+                return EXIT_FAILURE;
+            }
+        }
+    }
+
+    // Registramos las métricas en el registro por defecto, para procesos del sistema, if required
+    if (config[5])
+    {
+        for (int i = 0; i < N_PROC_COUNT; i++)
+        {
+            if (pcr_must_register_metric(processes_count[i]) == NULL)
+            {
+                fprintf(stderr, "Error al registrar las métricas de uso de procesos\n");
+                return EXIT_FAILURE;
+            }
         }
     }
 

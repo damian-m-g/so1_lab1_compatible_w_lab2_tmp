@@ -23,6 +23,8 @@
 #define N_NET_METRICS 6
 //! \brief Number of processes metrics.
 #define N_PROC_COUNT 2
+//! \brief Number of metrics tracked by a general status.
+#define G_STATUS_N_METRICS_TRACKED 4
 
 /**
  * @brief Actualiza la métrica de uso de CPU.

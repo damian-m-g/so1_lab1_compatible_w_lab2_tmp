@@ -33,9 +33,21 @@ extern unsigned char g_status[G_STATUS_N_METRICS_TRACKED];
 //! \brief Configuration data array.
 unsigned char config[N_JSON_ENTRIES] = JSON_ENTRIES_DEF_VAL;
 
+/* FUNCTIONS PROTOTYPE */
 //! \brief Handler ante syscalls SIGINT y SIGTERM.
+void handle_sigint_and_sigterm(int sig);
+//! \brief Handler ante syscall SIGUSR1; interpretada como petición de status.
+void handle_sigusr1(int sig, siginfo_t *info, void *context);
+//! \brief Register the handlers for different signals.
+void register_signal_handlers(void);
+//! \brief Method only called if a path to certain config file was provided to this program. Sets the config glob var.
+void set_configuration(char* path_to_config_file);
+
+/* FUNCTIONS DECLARATION */
 void handle_sigint_and_sigterm(int sig)
 {
+    // Unused arg
+    (void)sig;
     // Cierre de archivo temporal, usado por update_processes_gauge() en caso de que existe
     if (access(TEMP_PROC_METRICS_FILE, F_OK) == 0)
     {
@@ -49,7 +61,6 @@ void handle_sigint_and_sigterm(int sig)
     exit(EXIT_SUCCESS);
 }
 
-//! \brief Handler ante syscall SIGUSR1; interpretada como petición de status.
 void handle_sigusr1(int sig, siginfo_t *info, void *context)
 {
     // Args ignored
@@ -71,7 +82,6 @@ void handle_sigusr1(int sig, siginfo_t *info, void *context)
     }
 }
 
-//! \brief Register the handlers for different signals.
 void register_signal_handlers(void)
 {
     // Registro de signals handler para salida limpia
@@ -88,7 +98,6 @@ void register_signal_handlers(void)
     }
 }
 
-//! \brief Method only called if a path to certain config file was provided to this program. Sets the config glob var.
 void set_configuration(char* path_to_config_file)
 {
     // Open the file, and check for success
